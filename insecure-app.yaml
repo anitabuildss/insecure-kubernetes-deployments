@@ -14,6 +14,12 @@ spec:
       labels:
         app: insecure-app
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - image: confusedcrib/insecure-app:latest
         name: insecure-app
@@ -23,14 +29,13 @@ spec:
         - name: AWS_SECRET_ACCESS_KEY
           value: wJalrXUtnFEMI/K7MDENG/bPxRfiCYeh2g7ykyu8
         securityContext:
-          privileged: true
-        volumeMounts:                   
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-      volumes:                         
-      - name: docker-socket
-        hostPath:
-          path: /var/run/docker.sock
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
       serviceAccountName: insecure-app-sa
 ---
 kind: Service
