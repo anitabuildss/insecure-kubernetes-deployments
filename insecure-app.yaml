@@ -17,20 +17,15 @@ spec:
       containers:
       - image: confusedcrib/insecure-app:latest
         name: insecure-app
-        env:
-        - name: AWS_ACCESS_KEY_ID
-          value: AKIAIOSFODNN72HYSDD8
-        - name: AWS_SECRET_ACCESS_KEY
-          value: wJalrXUtnFEMI/K7MDENG/bPxRfiCYeh2g7ykyu8
         securityContext:
-          privileged: true
-        volumeMounts:                   
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
-      volumes:                         
-      - name: docker-socket
-        hostPath:
-          path: /var/run/docker.sock
+          privileged: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
       serviceAccountName: insecure-app-sa
 ---
 kind: Service
@@ -39,16 +34,13 @@ metadata:
   name: insecure-app
   namespace: insecure-app
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: insecure-app
   ports:
   - name: http
     port: 8080
     targetPort: 8080
-  - name: ssh
-    port: 22
-    targetPort: 22
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -56,8 +48,8 @@ metadata:
   name: insecure-app-role
 rules:
 - apiGroups: [""]
-  resources: ["pods", "serviceaccounts", "serviceaccounts/token"]
-  verbs: ["*"]
+  resources: ["pods"]
+  verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
