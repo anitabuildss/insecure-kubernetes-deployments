@@ -7,7 +7,7 @@ A repo meant for providing tools for security testing that is comically insecure
 ### General Configuration Issues
 
 1. Busybox is deployed as a long running pod with plenty of dangerous utilities on it
-2. Insecure App has fake AWS access keys as env variables, mounts the docker socket, runs in privileged mode, is open on port 8080 and port 22, and binds an SA role with permissions to create more SA roles
+2. Insecure App requires AWS credentials via Kubernetes Secrets, mounts the docker socket, runs in privileged mode, is open on port 8080 and port 22, and binds an SA role with permissions to create more SA roles
 3. Workload Security Evaluator contains all the same issues
 
 ### Insecure-app
@@ -31,7 +31,26 @@ kubectl create namespace insecure-app
 kubectl create namespace workload-security-evaluator
 ```
 
-2. Apply the deployment yamls
+2. Create AWS credentials secrets (replace with actual credentials)
+
+```
+kubectl create secret generic aws-credentials \
+  --from-literal=aws-access-key-id=YOUR_ACCESS_KEY_ID \
+  --from-literal=aws-secret-access-key=YOUR_SECRET_ACCESS_KEY \
+  -n insecure-app
+
+kubectl create secret generic aws-credentials \
+  --from-literal=aws-access-key-id=YOUR_ACCESS_KEY_ID \
+  --from-literal=aws-secret-access-key=YOUR_SECRET_ACCESS_KEY \
+  -n workload-security-evaluator
+```
+
+Alternatively, apply the secret template and update it:
+```
+kubectl apply -f aws-credentials-secret.yaml
+```
+
+3. Apply the deployment yamls
 
 ```
 kubectl apply -f busybox.yaml

@@ -21,9 +21,15 @@ spec:
         name: workload-security-evaluator
         env:
         - name: AWS_ACCESS_KEY_ID
-          value: AKIAIOSFODNN72HYSDD8
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: aws-access-key-id
         - name: AWS_SECRET_ACCESS_KEY
-          value: wJalrXUtnFEMI/K7MDENG/bPxRfiCYeh2g7ykyu8
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: aws-secret-access-key
         securityContext:
           privileged: true
         volumeMounts:
