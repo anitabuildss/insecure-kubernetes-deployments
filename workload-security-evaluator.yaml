@@ -52,28 +52,32 @@ spec:
     port: 22
     targetPort: 22
 ---
-kind: ClusterRole
+kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: workload-security-evaluator-role
+  namespace: workload-security-evaluator
 rules:
 - apiGroups: [""]
-  resources: ["pods", "serviceaccounts", "serviceaccounts/token"]
-  verbs: ["*"]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["serviceaccounts"]
+  verbs: ["get", "list"]
 ---
-kind: ClusterRoleBinding
+kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: workload-security-evaluator-role-binding
+  namespace: workload-security-evaluator
 subjects:
 - kind: ServiceAccount
   name: workload-security-evaluator-sa
   namespace: workload-security-evaluator
-  apiGroup: ""
 roleRef:
-  kind: ClusterRole
+  kind: Role
   name: workload-security-evaluator-role
-  apiGroup: ""
+  apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
 kind: ServiceAccount
