@@ -14,6 +14,7 @@ spec:
       labels:
         app: insecure-app
     spec:
+      automountServiceAccountToken: false
       containers:
       - image: confusedcrib/insecure-app:latest
         name: insecure-app
@@ -50,26 +51,28 @@ spec:
     port: 22
     targetPort: 22
 ---
-kind: ClusterRole
+kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: insecure-app-role
+  namespace: insecure-app
 rules:
 - apiGroups: [""]
-  resources: ["pods", "serviceaccounts", "serviceaccounts/token"]
-  verbs: ["*"]
+  resources: ["pods"]
+  verbs: ["get", "list"]
 ---
-kind: ClusterRoleBinding
+kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: insecure-app-role-binding
+  namespace: insecure-app
 subjects:
 - kind: ServiceAccount
   name: insecure-app-sa
   namespace: insecure-app
   apiGroup: ""
 roleRef:
-  kind: ClusterRole
+  kind: Role
   name: insecure-app-role
   apiGroup: ""
 ---
@@ -78,3 +81,4 @@ kind: ServiceAccount
 metadata:
   name: insecure-app-sa
   namespace: insecure-app
+automountServiceAccountToken: false
